@@ -7,6 +7,8 @@ import {
   ScrollRestoration,
   Link
 } from "react-router";
+import { FaInstagram } from "react-icons/fa";
+import { SiGroupme } from "react-icons/si";
 
 import type { Route } from "./+types/root";
 import "./app.css";
@@ -54,6 +56,14 @@ export default function App() {
             <li className="mb-2"><Link to="/project-fly" className="text-blue-600 hover:underline">Project Fly</Link></li>
             <li className="mb-2"><Link to="/meetings" className="text-blue-600 hover:underline">Meetings</Link></li>
           </ul>
+          <div className="flex space-x-4 mt-4">
+            <a href="https://www.instagram.com/noviengineeringclub/" target="_blank" rel="noopener noreferrer">
+              <FaInstagram className="text-gray-600 dark:text-gray-300 text-2xl hover:text-blue-500" />
+            </a>
+            <a href="https://groupme.com/" target="_blank" rel="noopener noreferrer">
+              <SiGroupme className="text-gray-600 dark:text-gray-300 text-2xl hover:text-blue-500" />
+            </a>
+          </div>
         </nav>
       </div>
       <div id="content" className="flex-grow p-4">
