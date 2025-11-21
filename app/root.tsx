@@ -57,10 +57,10 @@ export default function App() {
             <li className="mb-2"><Link to="/meetings" className="text-blue-600 hover:underline">Meetings</Link></li>
           </ul>
           <div className="flex space-x-4 mt-4">
-            <a href="https://www.instagram.com/noviengineeringclub/" target="_blank" rel="noopener noreferrer">
+            <a href="https://www.instagram.com/noviengineeringig/" target="_blank" rel="noopener noreferrer">
               <FaInstagram className="text-gray-600 dark:text-gray-300 text-2xl hover:text-blue-500" />
             </a>
-            <a href="https://groupme.com/" target="_blank" rel="noopener noreferrer">
+            <a href="https://groupme.com/join_group/104854219/05ltImUw" target="_blank" rel="noopener noreferrer">
               <SiGroupme className="text-gray-600 dark:text-gray-300 text-2xl hover:text-blue-500" />
             </a>
           </div>
