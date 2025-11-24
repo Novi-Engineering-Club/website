@@ -34,7 +34,7 @@ export default function ProjectPage() {
   const mdxComponents = useMDXComponents(components);
 
   return (
-    <div className="project-page p-8">
+    <div className="project-page p-8 mdx-content">
       <MDXProvider components={mdxComponents}>
         <MDXContent />
       </MDXProvider>

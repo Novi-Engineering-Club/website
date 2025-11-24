@@ -43,6 +43,7 @@ interface LoaderData {
 }
 
 import "./app.css";
+import "./mdx.css";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
