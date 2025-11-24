@@ -5,12 +5,43 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
-  Link
+  Link,
+  useLoaderData,
 } from "react-router";
+
+import { readdir } from "node:fs/promises";
+
+
 import { FaInstagram } from "react-icons/fa";
 import { SiGroupme } from "react-icons/si";
 
 import type { Route } from "./+types/root";
+
+export async function loader() {
+  let projectNames: string[] = [];
+  if (typeof window === "undefined") { // Check if running on the server
+    try {
+      const projectsPath = "./app/routes/projects";
+      const projectDirs = await readdir(projectsPath, { withFileTypes: true });
+      projectNames = projectDirs
+        .filter((dirent) => dirent.isDirectory())
+        .map((dirent) => dirent.name);
+    } catch (error) {
+      console.error("Failed to read project directories:", error);
+      // Fallback to empty array if readdir fails
+      projectNames = [];
+    }
+  }
+  return new Response(JSON.stringify({ projectNames }), {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+}
+interface LoaderData {
+  projectNames: string[];
+}
+
 import "./app.css";
 
 export const links: Route.LinksFunction = () => [
@@ -45,6 +76,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
+  const { projectNames } = useLoaderData<LoaderData>();
+
   return (
     <div className="flex h-screen">
       <div id="sidebar" className="w-1/5 bg-gray-200 dark:bg-gray-800 p-4">
@@ -52,8 +85,13 @@ export default function App() {
         <nav>
           <ul>
             <li className="mb-2"><Link to="/" className="text-blue-600 hover:underline">Home</Link></li>
-            <li className="mb-2"><Link to="/project-tt02" className="text-blue-600 hover:underline">Project TT-02</Link></li>
-            <li className="mb-2"><Link to="/project-fly" className="text-blue-600 hover:underline">Project Fly</Link></li>
+            {projectNames.map((projectName) => (
+              <li key={projectName} className="mb-2">
+                <Link to={`/projects/${projectName}`} className="text-blue-600 hover:underline">
+                  Project {projectName.charAt(0).toUpperCase() + projectName.slice(1)}
+                </Link>
+              </li>
+            ))}
             <li className="mb-2"><Link to="/meetings" className="text-blue-600 hover:underline">Meetings</Link></li>
           </ul>
           <div className="flex space-x-4 mt-4">
