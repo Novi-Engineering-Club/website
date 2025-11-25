@@ -1,0 +1,95 @@
+name: Process Uploaded Project
+
+on:
+  repository_dispatch:
+    types: [upload_project]
+
+jobs:
+  process-project:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Decode and Extract ZIP
+        run: |
+          PROJECT_NAME="${{ github.event.client_payload.projectName }}"
+          echo "${{ github.event.client_payload.zipContent }}" | base64 -d > project.zip
+          unzip -o project.zip
+          ls -la
+
+      - name: Validate Project Structure
+        run: |
+          PROJECT_NAME="${{ github.event.client_payload.projectName }}"
+          
+          # Check if md file exists
+          if [ ! -f "$PROJECT_NAME/$PROJECT_NAME.md" ]; then
+            echo "ERROR: Missing $PROJECT_NAME/$PROJECT_NAME.md"
+            exit 1
+          fi
+          
+          echo "✓ Project structure validated"
+
+      - name: Set up project directories
+        run: |
+          PROJECT_NAME="${{ github.event.client_payload.projectName }}"
+          
+          # Convert .md to .mdx for app/routes/projects/
+          mkdir -p app/routes/projects/$PROJECT_NAME
+          cp "$PROJECT_NAME/$PROJECT_NAME.md" app/routes/projects/$PROJECT_NAME/$PROJECT_NAME.mdx
+          
+          # Copy images if they exist
+          if [ -d "$PROJECT_NAME/images" ]; then
+            mkdir -p public/images/$PROJECT_NAME
+            cp -r "$PROJECT_NAME/images/"* public/images/$PROJECT_NAME/ 2>/dev/null || true
+          fi
+          
+          echo "✓ Project directories created"
+
+      - name: Update Route File
+        run: |
+          PROJECT_NAME="${{ github.event.client_payload.projectName }}"
+          ROUTE_FILE="app/routes/projects.\$projectName.tsx"
+          
+          # Convert kebab-case to PascalCase
+          IMPORT_NAME=$(echo "$PROJECT_NAME" | sed -r 's/(^|-)([a-z])/\U\2/g')
+          
+          # Add import if not present
+          if ! grep -q "import ${IMPORT_NAME}Project from" "$ROUTE_FILE"; then
+            sed -i "/^import TT02Project/a import ${IMPORT_NAME}Project from \"./projects/$PROJECT_NAME/$PROJECT_NAME.mdx\";" "$ROUTE_FILE"
+          fi
+          
+          # Add to projectMap if not present
+          if ! grep -q "\"$PROJECT_NAME\":" "$ROUTE_FILE"; then
+            sed -i "/tt02: TT02Project,/a\  $PROJECT_NAME: ${IMPORT_NAME}Project," "$ROUTE_FILE"
+          fi
+          
+          echo "✓ Route file updated"
+
+      - name: Clean up
+        run: |
+          PROJECT_NAME="${{ github.event.client_payload.projectName }}"
+          rm -rf project.zip "$PROJECT_NAME"
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          commit-message: "Add project: ${{ github.event.client_payload.projectName }}"
+          title: "Add project: ${{ github.event.client_payload.projectName }}"
+          body: |
+            # New Project: ${{ github.event.client_payload.projectName }}
+            
+            This PR automatically adds a new project to the website.
+            
+            **Changes:**
+            - Added MDX file to `app/routes/projects/${{ github.event.client_payload.projectName }}/`
+            - Added images to `public/images/${{ github.event.client_payload.projectName }}/`
+            - Updated route configuration
+            
+            Please review and merge if everything looks correct!
+          branch: project/${{ github.event.client_payload.projectName }}
+          delete-branch: true
