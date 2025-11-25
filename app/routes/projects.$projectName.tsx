@@ -1,24 +1,24 @@
 import type { MetaFunction, LoaderFunctionArgs } from "react-router";
-import { useLoaderData, useParams } from "react-router";
+import { useLoaderData } from "react-router";
 import { MDXProvider, useMDXComponents } from "@mdx-js/react";
-import remarkGfm from "remark-gfm";
+import FlyProject from "./projects/fly/fly.mdx";
+import TT02Project from "./projects/tt02/tt02.mdx";
+
+const projectMap = {
+  fly: FlyProject,
+  tt02: TT02Project,
+};
 
 export async function loader({ params }: LoaderFunctionArgs) {
   const projectName = params.projectName;
-  if (!projectName) {
+  if (!projectName || !(projectName in projectMap)) {
     throw new Response("Not Found", { status: 404 });
   }
 
-  try {
-    const mdxModule = await import(`/Users/smitpatil/Projects/website/app/routes/projects/${projectName}/${projectName}.mdx`);
-    return {
-      mdxContent: mdxModule.default,
-      title: `Project ${projectName.toUpperCase()}`,
-    };
-  } catch (error) {
-    console.error(`Failed to load MDX for project ${projectName}:`, error);
-    throw new Response("Not Found", { status: 404 });
-  }
+  return {
+    projectName,
+    title: `Project ${projectName.toUpperCase()}`,
+  };
 }
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
@@ -30,7 +30,8 @@ const components = {
 };
 
 export default function ProjectPage() {
-  const { mdxContent: MDXContent } = useLoaderData<typeof loader>();
+  const { projectName } = useLoaderData<typeof loader>();
+  const MDXContent = projectMap[projectName as keyof typeof projectMap];
   const mdxComponents = useMDXComponents(components);
 
   return (

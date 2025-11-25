@@ -6,8 +6,15 @@ import mdx from "@mdx-js/rollup";
 import remarkGfm from "remark-gfm";
 
 export default defineConfig({
-  plugins: [tailwindcss(), mdx({ remarkPlugins: [remarkGfm] }), reactRouter(), tsconfigPaths()],
-  server: {
+  plugins: [
+    tailwindcss(),
+    tsconfigPaths(),
 
-  },
+    mdx({
+      remarkPlugins: [remarkGfm],
+    }),
+
+    reactRouter(),
+  ]
 });
+
