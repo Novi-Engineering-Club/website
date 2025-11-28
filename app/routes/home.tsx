@@ -18,7 +18,9 @@ export default function Home() {
       <p className="mb-4">We typically meet in the iCube (at the Novi Public Library) after school on Wednesdays and we meet afterschool in the CAT lab on Fridays. Check our <a href="meetings">Meetings</a> page for the most up-to-date schedule and any changes.</p>
       
       <h2 className="text-2xl font-semibold mb-2">Join Us!</h2>
-      <p>Whether you're a seasoned engineer or just starting out, the Novi Engineering Club welcomes all students with an interest in design, building, and problem-solving. Come join us and turn your ideas into reality!</p>
+      <p className="mb-4">Whether you're a seasoned engineer or just starting out, the Novi Engineering Club welcomes all students with an interest in design, building, and problem-solving. Come join us and turn your ideas into reality!</p>
+
+      <h2 className="text-2xl font-semibold mb-2">Sponsors</h2>
     </div>
   );
 }
