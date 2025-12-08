@@ -52,7 +52,7 @@ export default function ProjectPage() {
   };
 
   return (
-    <div className="project-page p-8 markdown-content">
+    <div className="p-8 markdown">
       <ReactMarkdown components={components} remarkPlugins={[remarkGfm]}>
         {markdownContent}
       </ReactMarkdown>

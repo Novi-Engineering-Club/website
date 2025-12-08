@@ -44,6 +44,7 @@ interface LoaderData {
 
 import "./app.css";
 import "./mdx.css";
+import "./markdown.css";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -94,6 +95,7 @@ export default function App() {
               </li>
             ))}
             <li className="mb-2"><Link to="/meetings" className="text-blue-600 hover:underline">Meetings</Link></li>
+            <li className="mb-2"><Link to="/admin" className="text-blue-600 hover:underline font-semibold">Admin Panel</Link></li>
           </ul>
           <div className="flex space-x-4 mt-4">
             <a href="https://www.instagram.com/noviengineeringig/" target="_blank" rel="noopener noreferrer">
