@@ -1,35 +1,39 @@
 import json
 from pathlib import Path
 from flask import abort, jsonify
-from werkzeug.security import safe_join
 import markdown
 from html_to_markdown import convert as html_to_markdown
 
-from config import CONTENT_DIR, CACHE_FILE, MARKDOWN_EXTENSIONS
+from config import CONTENT_DIR, CACHE_FILE, MARKDOWN_EXTENSIONS, STORAGE_BACKEND
 from utils import extract_metadata_from_html, embed_metadata_in_html, strip_metadata_from_html
+from storage import get_storage
+
+# Initialize storage
+storage = get_storage(STORAGE_BACKEND, root_dir=CONTENT_DIR)
 
 # Global cache
 slug_cache = {}
 
 def build_slug_cache():
-    """Build cache of page slugs by scanning CONTENT_DIR for HTML files."""
+    """Build cache of page slugs by scanning storage for HTML files."""
     global slug_cache
     slugs = {}
-    CONTENT_DIR.mkdir(exist_ok=True)
+    
+    # Storage handles listing files
+    files = storage.list_files()
 
-    for html_file in CONTENT_DIR.rglob("*.html"):
-        relative_path = html_file.relative_to(CONTENT_DIR)
-        path_str = relative_path.as_posix()
-
-        if html_file.name == "index.html":
-            parent = relative_path.parent.as_posix()
+    for path_str in files:
+        if path_str.endswith("index.html"):
+            # Handle index.html mapping to parent folder
+            path_obj = Path(path_str)
+            parent = path_obj.parent.as_posix()
             slug = "/" if parent == "." else parent
         else:
             slug = path_str[:-5]  # Remove .html extension
 
         priority = -1
         try:
-            html_content = html_file.read_text(encoding="utf-8")
+            html_content = storage.get_content(path_str)
             metadata = extract_metadata_from_html(html_content)
             priority = metadata["priority"]
         except Exception:
@@ -115,12 +119,12 @@ def get_page_or_404(slug):
     if slug not in slug_cache:
         abort(404, description="Page not found")
 
-    full_path = safe_join(str(CONTENT_DIR), slug_cache[slug]["path"])
+    path = slug_cache[slug]["path"]
     try:
-        html_content = Path(full_path).read_text(encoding="utf-8")
+        html_content = storage.get_content(path)
         content = strip_metadata_from_html(html_content)
         return content
-    except FileNotFoundError:
+    except (FileNotFoundError, ValueError):
         abort(404, description="Page not found")
 
 
@@ -199,15 +203,14 @@ def get_page_content_by_slug(slug):
     """Get markdown content (converted from HTML) by slug for editing."""
     if slug not in slug_cache:
         return jsonify({"error": "Page not found"}), 404
-    relative_path = slug_cache[slug]["path"]
-    full_path = safe_join(str(CONTENT_DIR), relative_path)
+    path = slug_cache[slug]["path"]
     try:
-        html_content = Path(full_path).read_text(encoding="utf-8")
+        html_content = storage.get_content(path)
         markdown_content, priority = strip_priority_metadata(html_content)
         return jsonify(
-            {"content": markdown_content, "path": relative_path, "priority": priority}
+            {"content": markdown_content, "path": path, "priority": priority}
         )
-    except FileNotFoundError:
+    except (FileNotFoundError, ValueError):
         return jsonify({"error": "Page not found"}), 404
 
 def save_page_content(path, markdown_content, priority):
@@ -221,12 +224,8 @@ def save_page_content(path, markdown_content, priority):
     elif not path.endswith(".html"):
         path += ".html"
 
-    full_path = safe_join(str(CONTENT_DIR), path)
-    if not full_path:
-        return False, "Invalid path", None
-
     # Check if this is a new page or update
-    is_new = not Path(full_path).exists()
+    is_new = not storage.exists(path)
 
     try:
         priority = int(priority)
@@ -239,8 +238,10 @@ def save_page_content(path, markdown_content, priority):
     # Embed metadata in HTML
     html_with_metadata = embed_metadata_in_html(html_content, priority)
 
-    Path(full_path).parent.mkdir(parents=True, exist_ok=True)
-    Path(full_path).write_text(html_with_metadata, encoding="utf-8")
+    try:
+        storage.save_content(path, html_with_metadata)
+    except ValueError as e:
+        return False, str(e), None
     
     build_slug_cache() # Refresh cache
 
@@ -253,12 +254,11 @@ def delete_page_content(slug):
         return False, "Page not found", None
 
     page_path = slug_cache[slug]["path"]
-    full_path = safe_join(str(CONTENT_DIR), page_path)
     try:
-        Path(full_path).unlink()
+        storage.delete_content(page_path)
         build_slug_cache() # Refresh cache
         return True, f"Page '{page_path}' deleted successfully", page_path
-    except FileNotFoundError:
+    except (FileNotFoundError, ValueError):
         return False, "File not found", None
 
 # Initialize cache

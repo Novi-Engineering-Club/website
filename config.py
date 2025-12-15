@@ -12,6 +12,8 @@ BASE_DIR = Path(__file__).parent
 CONTENT_DIR = BASE_DIR / "pages"
 CACHE_FILE = BASE_DIR / "slugs.json"
 
+STORAGE_BACKEND = "filesystem"
+
 MARKDOWN_EXTENSIONS = [
     "extra",
     "codehilite",
