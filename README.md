@@ -24,7 +24,8 @@ A simple Flask-based CMS that serves HTML pages generated from Markdown.
 
 1.  Run the application:
     ```bash
-    python main.py
+    uv run src/main.py
+    python src/main.py
     ```
 
 2.  Open your browser:
