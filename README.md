@@ -1,20 +1,39 @@
-# Novi Engineering Club Team Website
+# Website CMS
 
-This will be the official website for Novi High School's Engineering Club
+A simple Flask-based CMS that serves HTML pages generated from Markdown.
 
-> Features in order of importance
-- [ ] TT-02 and Project Fly Pages
-- [ ] Static content - does not change year to year
-- [ ] Dropdown for projects
-- [ ] Automatic project fetching for .MD
-- [ ] Photo gallery
-- [ ] Contact us page -> send to noviengineeringig email
-- [ ] Join us page -> google forms, etc -> read from JSON
-- [ ] Update with actual meeting minutes (need to organize docs in team drive)
-- [ ] Set up with a free domain or switch to .tech
-- [ ] Document code
+## Setup
 
-> Timeline
- - [ ] December - Publish website
- - [ ] January - Maintain website + bug fixes
- - [ ] February - Futureproofing and complete project
+1.  Install dependencies:
+    ```bash
+    uv sync
+    ```
+    Or with pip:
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+2.  (Optional) Create a `.env` file to set the admin password:
+    ```env
+    ADMIN_PASSWORD=your_secure_password
+    SECRET_KEY=your_secret_key
+    ```
+    Default password is `admin`.
+
+## Usage
+
+1.  Run the application:
+    ```bash
+    python main.py
+    ```
+
+2.  Open your browser:
+    -   **Site:** [http://localhost:5000](http://localhost:5000)
+    -   **Admin:** [http://localhost:5000/admin](http://localhost:5000/admin)
+
+## Features
+
+-   **Markdown Editing:** Create and edit pages using Markdown in the admin interface.
+-   **Dynamic Navigation:** Navigation is automatically generated from the page structure.
+-   **Page Priority:** Set priority to control the order of pages in the navigation.
+-   **File-based:** Content is stored as HTML files in the `pages/` directory.

@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Page</title>
+    <link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css">
+    <style>
+        :root {
+            --bg-color: white;
+            --text-color: #333;
+            --accent-color: #006937;
+            --sidebar-bg: #f4f4f4;
+        }
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: sans-serif; display: flex; min-height: 100vh; background: var(--bg-color); color: var(--text-color); }
+        
+        /* Login Screen */
+        .login-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--sidebar-bg) 0%, var(--bg-color) 100%);
+        }
+        .login-box {
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        .login-box h1 { color: var(--accent-color); margin: 0 0 10px; }
+        .login-box p { color: #666; margin: 0 0 25px; }
+        .login-box input[type="password"] {
+            width: 100%;
+            padding: 12px 15px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            transition: border-color 0.3s;
+        }
+        .login-box input[type="password"]:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+        .login-box button {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .login-box button:hover { background: #005229; }
+        .login-error {
+            background: #f2dede;
+            color: #a94442;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            display: none;
+        }
+        
+        .sidebar {
+            width: 280px;
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--accent-color);
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar h2 { margin: 0 0 15px; color: var(--accent-color); font-size: 18px; }
+        .sidebar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .sidebar-header h2 { margin: 0; }
+        .btn-logout {
+            background: transparent;
+            border: 1px solid var(--accent-color);
+            color: var(--accent-color);
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .btn-logout:hover { background: var(--accent-color); color: white; }
+        
+        .tree-item { margin: 2px 0; }
+        .tree-folder { cursor: pointer; user-select: none; padding: 3px 0; }
+        .tree-folder:hover, .tree-file:hover { color: var(--accent-color); }
+        .tree-folder.active, .tree-file.active { color: var(--accent-color); font-weight: bold; }
+        .tree-children { margin-left: 18px; display: none; }
+        .tree-children.open { display: block; }
+        .tree-file { cursor: pointer; padding: 3px 0; display: block; }
+        .tree-file.active { color: var(--accent-color); font-weight: bold; }
+        .tree-label { padding: 3px 0; display: inline-block; }
+        
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .toolbar { display: flex; gap: 10px; margin-bottom: 15px; align-items: center; flex-wrap: wrap; }
+        .toolbar input { padding: 8px 12px; font-size: 14px; flex: 1; min-width: 200px; }
+        .toolbar button { padding: 8px 16px; font-size: 14px; cursor: pointer; border: none; border-radius: 4px; }
+        .btn-save { background: #4CAF50; color: white; }
+        .btn-save:hover { background: #45a049; }
+        .btn-delete { background: #f44336; color: white; }
+        .btn-delete:hover { background: #da190b; }
+        .btn-new { background: #2196F3; color: white; }
+        .btn-new:hover { background: #1976D2; }
+        
+        #editor { border: 1px solid #ccc; flex: 1; }
+        .status { 
+            margin-top: 10px; 
+            padding: 12px 15px; 
+            border-radius: 4px; 
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        .status.show { display: block; }
+        .status.success { background: #dff0d8; color: #3c763d; border: 1px solid #d6e9c6; }
+        .status.error { background: #f2dede; color: #a94442; border: 1px solid #ebccd1; }
+        .status.info { background: #d9edf7; color: #31708f; border: 1px solid #bce8f1; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .admin-container { display: flex; width: 100%; }
+    </style>
+</head>
+<body>
+    {% if not authenticated %}
+    <!-- Login Screen -->
+    <div class="login-container">
+        <div class="login-box">
+            <h1>🔐 Admin Login</h1>
+            <p>Enter password to access the admin panel</p>
+            <div id="login-error" class="login-error"></div>
+            <input type="password" id="login-password" placeholder="Enter password" onkeypress="if(event.key==='Enter')attemptLogin()">
+            <button onclick="attemptLogin()">Login</button>
+        </div>
+    </div>
+    <script>
+        async function attemptLogin() {
+            const password = document.getElementById('login-password').value;
+            const errorEl = document.getElementById('login-error');
+            
+            try {
+                const res = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password })
+                });
+                const data = await res.json();
+                
+                if (data.success) {
+                    window.location.reload();
+                } else {
+                    errorEl.textContent = data.error || 'Login failed';
+                    errorEl.style.display = 'block';
+                }
+            } catch (e) {
+                errorEl.textContent = 'Connection error. Please try again.';
+                errorEl.style.display = 'block';
+            }
+        }
+        document.getElementById('login-password').focus();
+    </script>
+    {% else %}
+    <!-- Admin Interface -->
+    <div class="admin-container">
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2>📁 Pages</h2>
+            <button class="btn-logout" onclick="logout()">Logout</button>
+        </div>
+        <div id="file-tree">
+            {% macro render_tree(tree) %}
+                {% for name, item in tree.items() %}
+                    {% if '_children' in item and item._children %}
+                        <div class="tree-item">
+                            {% if 'slug' in item %}
+                            <div class="tree-folder" data-slug="{{ item.slug }}" data-path="{{ item.path }}" onclick="toggleFolderAndLoad(this)">
+                                <span class="folder-icon">📁</span> <span class="tree-label">{{ name }}</span>
+                            </div>
+                            {% else %}
+                            <div class="tree-folder" onclick="toggleFolder(this)">
+                                <span class="folder-icon">📁</span> <span class="tree-label">{{ name }}</span>
+                            </div>
+                            {% endif %}
+                            <div class="tree-children">
+                                {{ render_tree(item['_children']) }}
+                            </div>
+                        </div>
+                    {% elif 'slug' in item %}
+                        <div class="tree-item">
+                            <span class="tree-file" data-slug="{{ item.slug }}" data-path="{{ item.path }}" onclick="loadPage(this)">
+                                {% if item.is_index %}📁{% else %}📄{% endif %} {{ name }}
+                            </span>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            {% endmacro %}
+            {{ render_tree(file_tree) }}
+        </div>
+    </div>
+    
+    <div class="main-content">
+        <h1>Admin Editor</h1>
+        
+        <div class="toolbar">
+            <button class="btn-new" onclick="newPage()">+ New Page</button>
+            <label>Path: pages/</label>
+            <input type="text" id="file-path" placeholder="e.g., about or blog/post-1">
+            <label>Priority:</label>
+            <input type="number" id="priority" placeholder="-1" style="width: 70px; flex: none;" value="-1" min="-1">
+            <button class="btn-save" onclick="savePage()">Save</button>
+            <button class="btn-delete" onclick="deletePage()">Delete</button>
+        </div>
+
+        <div id="editor"></div>
+        <div id="status"></div>
+    </div>
+    </div>
+
+    <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
+    <script>
+        const editor = new toastui.Editor({
+            el: document.querySelector('#editor'),
+            height: '500px',
+            initialValue: '',
+            initialEditType: 'wysiwyg'
+        });
+
+        const filePath = document.getElementById('file-path');
+        const priorityInput = document.getElementById('priority');
+        const status = document.getElementById('status');
+        let currentSlug = null;
+
+        function showStatus(message, type = 'success') {
+            status.textContent = message;
+            status.className = 'status show ' + type;
+            if (type !== 'info') {
+                setTimeout(() => {
+                    status.classList.remove('show');
+                }, 4000);
+            }
+        }
+
+        function hideStatus() {
+            status.classList.remove('show');
+        }
+
+        async function logout() {
+            try {
+                await fetch('/api/logout', { method: 'POST' });
+                window.location.reload();
+            } catch (e) {
+                showStatus('Failed to logout', 'error');
+            }
+        }
+
+        function toggleFolder(el) {
+            const parent = el.closest('.tree-item');
+            const children = parent.querySelector('.tree-children');
+            if (children) {
+                children.classList.toggle('open');
+                const icon = el.querySelector('.folder-icon');
+                icon.textContent = children.classList.contains('open') ? '📂' : '📁';
+            }
+        }
+
+        async function toggleFolderAndLoad(el) {
+            toggleFolder(el);
+            
+            document.querySelectorAll('.tree-file, .tree-folder').forEach(f => f.classList.remove('active'));
+            el.classList.add('active');
+            
+            const slug = el.dataset.slug;
+            currentSlug = slug;
+            
+            const endpoint = slug === '/' ? '/api/page/root' : '/api/page/' + encodeURIComponent(slug);
+            
+            try {
+                const res = await fetch(endpoint);
+                const data = await res.json();
+                if (data.error) {
+                    showStatus(data.error, 'error');
+                } else {
+                    editor.setMarkdown(data.content);
+                    filePath.value = data.path.replace(/\.md$/, '');
+                    priorityInput.value = data.priority ?? -1;
+                    hideStatus();
+                }
+            } catch (e) {
+                showStatus('Failed to load page', 'error');
+            }
+        }
+
+        async function loadPage(el) {
+            document.querySelectorAll('.tree-file, .tree-folder').forEach(f => f.classList.remove('active'));
+            el.classList.add('active');
+            
+            const slug = el.dataset.slug;
+            currentSlug = slug;
+            
+            const endpoint = slug === '/' ? '/api/page/root' : '/api/page/' + encodeURIComponent(slug);
+            
+            try {
+                const res = await fetch(endpoint);
+                const data = await res.json();
+                if (data.error) {
+                    showStatus(data.error, 'error');
+                } else {
+                    editor.setMarkdown(data.content);
+                    filePath.value = data.path.replace(/\.html$/, '');
+                    priorityInput.value = data.priority ?? -1;
+                    hideStatus();
+                }
+            } catch (e) {
+                showStatus('Failed to load page', 'error');
+            }
+        }
+
+        function newPage() {
+            document.querySelectorAll('.tree-file, .tree-folder').forEach(f => f.classList.remove('active'));
+            
+            const currentPath = filePath.value.trim();
+            let prefix = '';
+            if (currentPath) {
+                const lastSlash = currentPath.lastIndexOf('/');
+                if (lastSlash > 0) {
+                    prefix = currentPath.substring(0, lastSlash + 1);
+                }
+            }
+            
+            currentSlug = null;
+            filePath.value = prefix;
+            priorityInput.value = -1;
+            editor.setMarkdown('');
+            showStatus('Creating new page. Enter a path and content, then click Save.', 'info');
+        }
+
+        async function savePage() {
+            const path = filePath.value.trim();
+            if (!path) {
+                showStatus('Please enter a file path', 'error');
+                return;
+            }
+
+            const priority = parseInt(priorityInput.value, 10) || -1;
+            showStatus('Saving...', 'info');
+
+            try {
+                const res = await fetch('/api/page', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ path, content: editor.getMarkdown(), priority })
+                });
+                const data = await res.json();
+                if (data.error) {
+                    showStatus(data.error, 'error');
+                } else {
+                    const icon = data.action === 'created' ? '✨' : '✅';
+                    showStatus(`${icon} ${data.message}`, 'success');
+                    currentSlug = data.path.replace(/\.html$/, '').replace(/^index$/, '/').replace(/\/index$/, s => s.slice(0, -6) || '/');
+                    if (data.path === 'index.html') currentSlug = '/';
+                    else if (data.path.endsWith('/index.html')) currentSlug = data.path.slice(0, -11);
+                    else currentSlug = data.path.replace(/\.html$/, '');
+                    
+                    // Reload page tree after a short delay
+                    setTimeout(() => location.reload(), 1500);
+                }
+            } catch (e) {
+                showStatus('Failed to save page. Please try again.', 'error');
+            }
+        }
+
+        async function deletePage() {
+            if (!currentSlug) {
+                showStatus('Please select a page to delete', 'error');
+                return;
+            }
+            if (!confirm('Are you sure you want to delete this page?')) return;
+
+            showStatus('Deleting...', 'info');
+
+            try {
+                const res = await fetch('/api/page', {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ slug: currentSlug })
+                });
+                const data = await res.json();
+                if (data.error) {
+                    showStatus(data.error, 'error');
+                } else {
+                    showStatus(`🗑️ ${data.message}`, 'success');
+                    setTimeout(() => location.reload(), 1500);
+                }
+            } catch (e) {
+                showStatus('Failed to delete page. Please try again.', 'error');
+            }
+        }
+    </script>
+</body>
+</html>
+    {% endif %}
