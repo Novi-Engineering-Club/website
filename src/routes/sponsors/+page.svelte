@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { ArrowRight, Gem, Mail, Trophy } from "lucide-svelte";
+    import { ArrowRight, Mail, Trophy } from "lucide-svelte";
 </script>
 
 <section class="hero">
@@ -11,25 +11,32 @@
     </p>
 </section>
 
-<section class="tiers">
-    <div class="tier platinum">
-        <div class="tier-header">
-            <div class="tier-badge platinum-badge">Platinum</div>
-            <Gem class="tier-icon" size={30} aria-hidden="true" />
+<section class="sponsors-grid">
+    <div class="sponsor-card">
+        <div class="card-content">
+            <Trophy class="sponsor-icon" size={30} aria-hidden="true" />
+            <h2>MAHLE</h2>
+            <p>Monetary funds</p>
         </div>
-        <h2>MAHLE</h2>
-        <p>Monetary funds</p>
-        <div class="tier-decoration"></div>
+        <img class="sponsor-image" src="/mahle.png" alt="MAHLE" />
     </div>
 
-    <div class="tier gold">
-        <div class="tier-header">
-            <div class="tier-badge gold-badge">Gold</div>
-            <Trophy class="tier-icon" size={30} aria-hidden="true" />
+    <div class="sponsor-card">
+        <div class="card-content">
+            <Trophy class="sponsor-icon" size={30} aria-hidden="true" />
+            <h2>Nankin Farmington</h2>
+            <p>Monetary funds</p>
         </div>
-        <h2>Nankin Farmington</h2>
-        <p>Monetary funds</p>
-        <div class="tier-decoration"></div>
+        <img class="sponsor-image" src="/nankin_logo.png" alt="Nankin Farmington" />
+    </div>
+
+    <div class="sponsor-card">
+        <div class="card-content">
+            <Trophy class="sponsor-icon" size={30} aria-hidden="true" />
+            <h2>NEF</h2>
+            <p>Resources and support</p>
+        </div>
+        <img class="sponsor-image" src="/nefTrue.png" alt="NEF" />
     </div>
 </section>
 
@@ -38,7 +45,7 @@
         <h2>Interested in sponsoring?</h2>
         <p>We welcome partners who want to support student-led engineering.</p>
     </div>
-    <a class="button" href="mailto:novpatils09@stu.novik12.org">
+    <a class="button" href="/contact">
         <Mail class="button-icon" size={18} aria-hidden="true" />
         <span>Get in touch</span>
         <ArrowRight class="arrow" size={18} aria-hidden="true" />
@@ -85,13 +92,14 @@
         font-size: 0.95rem;
     }
 
-    .tiers {
+    .sponsors-grid {
         display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
         gap: 24px;
         padding: 56px 0 40px;
     }
 
-    .tier {
+    .sponsor-card {
         border: 2px solid var(--border);
         border-radius: 5px;
         padding: 32px;
@@ -101,160 +109,98 @@
         overflow: hidden;
         transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        align-items: center;
+        text-align: center;
+        min-height: 300px;
     }
 
-    .tier:nth-child(1) {
+    .card-content {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        align-items: center;
+        text-align: center;
+        position: relative;
+        z-index: 2;
+        transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .sponsor-image {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        opacity: 0;
+        transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        z-index: 1;
+    }
+
+    .sponsor-card:hover .sponsor-image {
+        opacity: 1;
+    }
+
+    .sponsor-card:hover .card-content {
+        opacity: 0;
+    }
+
+    .sponsor-card:nth-child(1) {
         animation-delay: 0.1s;
     }
-    .tier:nth-child(2) {
+    .sponsor-card:nth-child(2) {
         animation-delay: 0.2s;
     }
+    .sponsor-card:nth-child(3) {
+        animation-delay: 0.3s;
+    }
 
-    .tier::before {
+    .sponsor-card::before {
         content: "";
         position: absolute;
         top: 0;
         left: 0;
         width: 100%;
-        height: 6px;
+        height: 4px;
+        background: linear-gradient(90deg, var(--accent), var(--accent-dark));
         transform: scaleX(0);
         transform-origin: left;
         transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        z-index: 3;
     }
 
-    .tier.platinum::before {
-        background: linear-gradient(90deg, #e5e4e2, #b8b8b8);
-    }
-
-    .tier.gold::before {
-        background: linear-gradient(90deg, #ffd700, #b8860b);
-    }
-
-    .tier:hover {
-        transform: translateY(-4px);
+    .sponsor-card:hover {
+        transform: translateY(-6px);
         box-shadow: var(--shadow-lg);
+        border-color: var(--accent);
     }
 
-    .tier:hover::before {
+    .sponsor-card:hover::before {
         transform: scaleX(1);
     }
 
-    .tier-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
-    }
-
-    .tier-badge {
-        font-family: var(--font-mono);
-        font-size: 0.7rem;
-        font-weight: 600;
-        letter-spacing: 0.15em;
-        padding: 6px 12px;
-        border-radius: 6px;
-        border: 1px solid;
-        background-size: 200% 200%;
-        animation: badgeGradientShift 4s ease-in-out infinite;
-    }
-
-    .platinum-badge {
-        background-image: linear-gradient(
-            120deg,
-            rgba(245, 245, 245, 0.35),
-            rgba(215, 215, 215, 0.45),
-            rgba(183, 183, 183, 0.35),
-            rgba(245, 245, 245, 0.35)
-        );
-        color: #6f6f6f;
-        border-color: rgba(184, 184, 184, 0.8);
-    }
-
-    .gold-badge {
-        background-image: linear-gradient(
-            120deg,
-            rgba(255, 228, 106, 0.35),
-            rgba(255, 200, 56, 0.45),
-            rgba(204, 140, 0, 0.35),
-            rgba(255, 228, 106, 0.35)
-        );
-        color: #8e5f00;
-        border-color: rgba(255, 215, 0, 0.85);
-    }
-
-    :global(:root[data-theme="dark"]) .platinum-badge {
-        background-image: linear-gradient(
-            120deg,
-            rgba(244, 247, 252, 0.3),
-            rgba(220, 227, 239, 0.45),
-            rgba(168, 183, 208, 0.3),
-            rgba(244, 247, 252, 0.3)
-        );
-        color: #f3f7ff;
-        border-color: rgba(236, 242, 252, 0.85);
-    }
-
-    :global(:root[data-theme="dark"]) .gold-badge {
-        background-image: linear-gradient(
-            120deg,
-            rgba(255, 231, 148, 0.35),
-            rgba(255, 203, 89, 0.5),
-            rgba(214, 151, 34, 0.35),
-            rgba(255, 231, 148, 0.35)
-        );
-        color: #fff0c5;
-        border-color: rgba(255, 220, 116, 0.9);
-    }
-
-    @keyframes badgeGradientShift {
-        0% {
-            background-position: 0% 50%;
-        }
-        50% {
-            background-position: 100% 50%;
-        }
-        100% {
-            background-position: 0% 50%;
-        }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-        .tier-badge {
-            animation: none;
-        }
-    }
-
-    .tier-icon {
-        color: var(--ink-light);
+    .sponsor-icon {
+        color: var(--accent-dark);
         flex-shrink: 0;
     }
 
-    .tier h2 {
+    .sponsor-card h2 {
         font-family: var(--font-display);
-        margin: 0 0 12px;
-        font-size: 1.8rem;
-        font-weight: 800;
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 700;
         letter-spacing: -0.01em;
         color: var(--ink);
     }
 
-    .tier p {
+    .sponsor-card p {
         font-family: var(--font-mono);
         margin: 0;
         color: var(--ink-muted);
         line-height: 1.6;
         font-size: 0.9rem;
-    }
-
-    .tier-decoration {
-        position: absolute;
-        bottom: -20px;
-        right: -20px;
-        width: 100px;
-        height: 100px;
-        border-radius: 50%;
-        background: radial-gradient(circle, var(--accent-glow), transparent);
-        opacity: 0.3;
     }
 
     .cta {

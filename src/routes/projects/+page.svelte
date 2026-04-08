@@ -8,7 +8,7 @@
     } from "lucide-svelte";
 
     const getProjectIcon = (slug: string) => {
-        if (slug === "fly") return Rocket;
+        if (slug === "plane") return Rocket;
         if (slug === "tt02") return Gauge;
         return FolderKanban;
     };

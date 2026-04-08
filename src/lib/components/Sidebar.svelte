@@ -57,6 +57,13 @@
         >
             Sponsors
         </a>
+        <a
+            class="nav-link"
+            class:active={$page.url.pathname === "/contact"}
+            href="/contact"
+        >
+            Contact
+        </a>
     </nav>
 
     <div class="socials">
