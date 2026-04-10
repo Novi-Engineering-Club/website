@@ -52,6 +52,13 @@
         </details>
         <a
             class="nav-link"
+            class:active={$page.url.pathname === "/interest"}
+            href="/interest"
+        >
+            Interest Group
+        </a>
+        <a
+            class="nav-link"
             class:active={$page.url.pathname === "/sponsors"}
             href="/sponsors"
         >
@@ -74,7 +81,7 @@
             rel="noopener"
             aria-label="GroupMe"
         >
-            <Send size={18} aria-hidden="true" />
+            <Send size={16} aria-hidden="true" />
         </a>
         <a
             class="social-icon"
@@ -83,14 +90,14 @@
             rel="noopener"
             aria-label="Instagram"
         >
-            <Instagram size={18} aria-hidden="true" />
+            <Instagram size={16} aria-hidden="true" />
         </a>
         <a
             class="social-icon"
             href="mailto:novpatils09@stu.novik12.org"
             aria-label="Email"
         >
-            <Mail size={18} aria-hidden="true" />
+            <Mail size={16} aria-hidden="true" />
         </a>
         <a
             class="social-icon"
@@ -99,7 +106,7 @@
             rel="noopener"
             aria-label="Discord"
         >
-            <MessageSquare size={18} aria-hidden="true" />
+            <MessageSquare size={16} aria-hidden="true" />
         </a>
     </div>
 </aside>
@@ -297,12 +304,12 @@
         margin-top: auto;
         display: flex;
         flex-wrap: wrap;
-        gap: 10px;
+        gap: 8px;
     }
 
     .social-icon {
-        width: 44px;
-        height: 44px;
+        width: 36px;
+        height: 36px;
         border-radius: 100px;
         border: 2px solid var(--border);
         display: grid;

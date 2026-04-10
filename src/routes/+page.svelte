@@ -48,7 +48,7 @@
             </p>
         </div>
 
-        <div class="info-banner">
+        <a href="/minutes" class="info-banner">
             <div class="info-icon">
                 <MapPin size={28} aria-hidden="true" />
             </div>
@@ -59,7 +59,7 @@
                     and sponsors.
                 </p>
             </div>
-        </div>
+        </a>
     </div>
 </main>
 
@@ -257,6 +257,17 @@
         padding: 28px 32px;
         margin-top: 16px;
         animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.9s backwards;
+        text-decoration: none;
+        color: inherit;
+        cursor: pointer;
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .info-banner:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
+        border-color: var(--accent);
+        background: var(--surface-elevated);
     }
 
     .info-icon {
